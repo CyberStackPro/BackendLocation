@@ -11,7 +11,8 @@ dotenv.config();
 
 const app = express();
 const corsOptions = {
-  origin: "https://locationdetect.onrender.com", // Frontend URL
+  // origin: "https://locationdetect.onrender.com", // Frontend URL
+  origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
@@ -22,18 +23,50 @@ app.use(useragent.express());
 app.use(requestIp.mw());
 
 // Connect to MongoDB
-mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost/locationaware_db", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB Connected..."))
-  .catch((err) => console.error("MongoDB connection error:", err));
+mongoose.connect(
+  process.env.MONGODB_URI || "mongodb://localhost/locationaware_db",
+  {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 60000, // Increase to 60 seconds
+    socketTimeoutMS: 60000, // Increase to 60 seconds
+    connectTimeoutMS: 60000, // Add connection timeout
+    // Add these additional options
+    maxPoolSize: 10,
+    retryWrites: true,
+    w: "majority",
+  }
+);
+
+// Add connection error handling
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
+});
+
+mongoose.connection.once("open", () => {
+  console.log("Connected to MongoDB successfully");
+});
 
 // Registration and Login endpoints
 app.post("/api/register", async (req, res) => {
+  const { username, password, email } = req.body;
   try {
-    const { username, password, email } = req.body;
+    // Add validation
+    if (!username || !password || !email) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Check if user exists before saving
+    const existingUser = await User.findOne({
+      $or: [{ username }, { email }],
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        error: "Username or email already exists",
+      });
+    }
+
     const locationAndDeviceInfo = getLocationAndDeviceInfo(req);
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -60,7 +93,10 @@ app.post("/api/register", async (req, res) => {
       locationInfo: locationAndDeviceInfo,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Registration error:", error);
+    res.status(500).json({
+      error: "Registration failed. Please try again later.",
+    });
   }
 });
 
