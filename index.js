@@ -10,8 +10,13 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
+const corsOptions = {
+  origin: "https://locationdetect.onrender.com", // Frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(useragent.express());
 app.use(requestIp.mw());
