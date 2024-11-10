@@ -6,6 +6,8 @@ const useragent = require("express-useragent");
 const requestIp = require("request-ip");
 const User = require("./models/User");
 const getLocationAndDeviceInfo = require("./middleawre/getLocation");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
 
@@ -16,7 +18,7 @@ app.use(requestIp.mw());
 
 // Connect to MongoDB
 mongoose
-  .connect("mongodb://localhost/locationaware_db", {
+  .connect(process.env.MONGODB_URI || "mongodb://localhost/locationaware_db", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
