@@ -10,18 +10,14 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
-// const corsOptions = {
-//   origin: "https://locationdetect.onrender.com",
-//   methods: ["GET", "POST", "PUT", "DELETE"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-// };
+const corsOptions = {
+  origin: ["https://locationdetect.onrender.com", "http://localhost:5173"],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "https://locationdetect.onrender.com"],
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(useragent.express());
 app.use(requestIp.mw());
@@ -40,8 +36,8 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   },
-  maxPoolSize: 50,
-  wtimeoutMS: 2500,
+  // maxPoolSize: 50,
+  // wtimeoutMS: 2500,
   connectTimeoutMS: 30000,
 });
 
@@ -57,11 +53,23 @@ async function connectDB() {
     throw error;
   }
 }
+// Add a test connection on startup
+connectDB()
+  .then(() => {
+    console.log(`Connected to database: ${process.env.DB_NAME}`);
+  })
+  .catch((error) => {
+    console.error("Failed to connect to database on startup:", error);
+    process.exit(1);
+  });
 
 // Modified registration endpoint
 app.post("/api/register", async (req, res) => {
   try {
     const db = await connectDB();
+    if (!db) {
+      throw new Error("Database connection failed");
+    }
     const usersCollection = db.collection("users");
 
     const { username, password, email } = req.body;
