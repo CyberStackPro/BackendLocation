@@ -10,19 +10,26 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
-const corsOptions = {
-  origin: "https://locationdetect.onrender.com",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+// const corsOptions = {
+//   origin: "https://locationdetect.onrender.com",
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+// };
 
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://locationdetect.onrender.com"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(useragent.express());
 app.use(requestIp.mw());
 
 // MongoDB Connection
-const uri = process.env.MONGODB_URI;
+const uri =
+  process.env.MONGODB_URI ||
+  "mongodb+srv://Freedom12:Freedom12@cluster0.89dslq4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
