@@ -11,8 +11,8 @@ dotenv.config();
 
 const app = express();
 const corsOptions = {
-  // origin: "https://locationdetect.onrender.com", // Frontend URL
-  origin: "http://localhost:5173",
+  origin: "https://locationdetect.onrender.com", // Frontend URL
+  // origin: "http://localhost:5173",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
