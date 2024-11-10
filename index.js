@@ -30,6 +30,10 @@ app.use(requestIp.mw());
 const uri =
   process.env.MONGODB_URI ||
   "mongodb+srv://Freedom12:Freedom12@cluster0.89dslq4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+if (!uri) {
+  throw new Error("MONGODB_URI environment variable is not set");
+}
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
