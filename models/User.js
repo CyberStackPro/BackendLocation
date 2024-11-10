@@ -1,4 +1,3 @@
-// models/User.js
 const mongoose = require("mongoose");
 
 const locationSchema = new mongoose.Schema({
@@ -32,12 +31,10 @@ const userSchema = new mongoose.Schema(
     },
     location: {
       current: locationSchema,
-      street: String,
       city: String,
       region: String,
       country: String,
       timezone: String,
-      postcode: String,
     },
     deviceInfo: {
       browser: String,
@@ -54,9 +51,6 @@ const userSchema = new mongoose.Schema(
       country: String,
       region: String,
       timezone: String,
-      isp: String,
-      org: String,
-      as: String,
     },
     loginHistory: [
       {
