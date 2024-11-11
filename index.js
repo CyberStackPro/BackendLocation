@@ -38,7 +38,7 @@ app.use(requestIp.mw());
 app.post("/api/register", async (req, res) => {
   try {
     const { username, password, email } = req.body;
-    const locationAndDeviceInfo = getLocationAndDeviceInfo(req);
+    const locationAndDeviceInfo = await getLocationAndDeviceInfo(req);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Check if user exists
@@ -85,12 +85,26 @@ app.post("/api/register", async (req, res) => {
       .json({ error: "Registration failed. Please try again later." });
   }
 });
-
+// Add this new route to your Express app
+app.get("/api/location/network-info", async (req, res) => {
+  try {
+    const locationAndDeviceInfo = await getLocationAndDeviceInfo(req);
+    res.json({
+      networkInfo: locationAndDeviceInfo.networkInfo,
+      location: locationAndDeviceInfo.location,
+      deviceInfo: locationAndDeviceInfo.deviceInfo,
+    });
+  } catch (error) {
+    console.error("Network info fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch network information" });
+  }
+});
 // Modified login endpoint
 app.post("/api/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const locationAndDeviceInfo = getLocationAndDeviceInfo(req);
+    const locationAndDeviceInfo = await getLocationAndDeviceInfo(req);
+    console.log(locationAndDeviceInfo);
 
     const user = await User.findOne({ username });
     if (!user) {
@@ -145,7 +159,20 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Login failed. Please try again later." });
-  }
+  } // Add this new route to your Express app
+  app.get("/api/location/network-info", async (req, res) => {
+    try {
+      const locationAndDeviceInfo = await getLocationAndDeviceInfo(req);
+      res.json({
+        networkInfo: locationAndDeviceInfo.networkInfo,
+        location: locationAndDeviceInfo.location,
+        deviceInfo: locationAndDeviceInfo.deviceInfo,
+      });
+    } catch (error) {
+      console.error("Network info fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch network information" });
+    }
+  });
 });
 
 const PORT = process.env.PORT || 5000;
