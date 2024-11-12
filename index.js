@@ -89,14 +89,39 @@ app.post("/api/register", async (req, res) => {
 app.get("/api/location/network-info", async (req, res) => {
   try {
     const locationAndDeviceInfo = await getLocationAndDeviceInfo(req);
-    res.json({
-      networkInfo: locationAndDeviceInfo.networkInfo,
-      location: locationAndDeviceInfo.location,
-      deviceInfo: locationAndDeviceInfo.deviceInfo,
-    });
+    res.json(locationAndDeviceInfo);
   } catch (error) {
     console.error("Network info fetch error:", error);
-    res.status(500).json({ error: "Failed to fetch network information" });
+    res.status(500).json({
+      error: "Failed to fetch network information",
+      details: error.message,
+    });
+  }
+});
+app.post("/api/location/update-coordinates", async (req, res) => {
+  try {
+    const { coordinates } = req.body;
+    const locationAndDeviceInfo = await getLocationAndDeviceInfo(req);
+
+    // Merge the precise coordinates with the location info
+    const updatedLocationInfo = {
+      ...locationAndDeviceInfo,
+      location: {
+        ...locationAndDeviceInfo.location,
+        current: {
+          type: "Point",
+          coordinates: coordinates,
+        },
+      },
+    };
+
+    res.json(updatedLocationInfo);
+  } catch (error) {
+    console.error("Update coordinates error:", error);
+    res.status(500).json({
+      error: "Failed to update coordinates",
+      details: error.message,
+    });
   }
 });
 // Modified login endpoint
