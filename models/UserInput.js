@@ -8,12 +8,16 @@ const locationSchema = new mongoose.Schema({
   },
   source: {
     type: String,
-    enum: ["ip", "browser", "manual"],
+    enum: ["ip", "browser", "manual", "combined"],
     default: "ip",
   },
   accuracy: {
     type: Number,
     default: null,
+  },
+  confidence: {
+    type: Number,
+    default: 0,
   },
   timestamp: {
     type: Date,
@@ -23,9 +27,13 @@ const locationSchema = new mongoose.Schema({
     type: [Number],
     required: true,
   },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const userSchema = new mongoose.Schema(
+const userInputSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -33,14 +41,13 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    password: {
-      type: String,
+    inputNumber: {
+      type: Number,
       required: true,
     },
-    email: {
-      type: String,
+    browserCoordinates: {
+      type: [Number], // [longitude, latitude]
       required: true,
-      unique: true,
     },
     location: {
       current: locationSchema,
@@ -86,6 +93,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.index({ "location.current": "2dsphere" });
+userInputSchema.index({ "location.current": "2dsphere" });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("UserInput", userInputSchema);
