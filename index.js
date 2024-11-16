@@ -13,6 +13,7 @@ const geoip = require("geoip-lite");
 const dotenv = require("dotenv");
 const connectToMongoDb = require("./config/db");
 const UserInput = require("./models/UserInput");
+const UserLocation = require("./models/UserLocation");
 
 dotenv.config();
 
@@ -189,6 +190,34 @@ app.post("/api/user-input/register", async (req, res) => {
     });
   }
 });
+
+app.post("/api/user/locate", async (req, res) => {
+  try {
+    const { latitude, longitude, accuracy } = req.body;
+
+    if (!latitude || !longitude) {
+      return res
+        .status(400)
+        .json({ error: "Latitude and longitude are required." });
+    }
+
+    // Create the location document
+    const newLocation = new UserLocation({
+      browserCoordinates: [longitude, latitude],
+    });
+
+    await newLocation.save();
+
+    res.status(201).json({
+      message: "User location saved successfully.",
+      userLocation: newLocation,
+    });
+  } catch (error) {
+    console.error("Error saving location:", error.message);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 // Add this new route to your Express app
 app.get("/api/location/network-info", async (req, res) => {
   try {
