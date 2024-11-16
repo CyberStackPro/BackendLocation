@@ -20,7 +20,7 @@ const app = express();
 
 const corsOptions = {
   origin: [
-    // "https://locationdetect.onrender.com",
+    "https://secureinformation.netlify.app",
     "https://locationdetect.onrender.com",
     "http://localhost:5173",
   ],
